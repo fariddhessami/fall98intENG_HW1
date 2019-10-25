@@ -6,12 +6,17 @@ server.use(express.json());
 var bodyParser = require('body-parser');
 
 
+var inside = require('point-in-geopolygon');
+
+
 
 var the_requested_point = {
     "coordinates": [33, 14]
 }
 
-var the_polygons = [];
+var the_polygons_with_names = [];
+
+var the_result_polygons_with_names = {};
 
 
 
@@ -37,10 +42,42 @@ server.get('/gis/test3', (req, res) => {
     res.send(the_requested_point);
 })
 
-server.get('/gis/testpoint/:lat/:long', (req, res) => {
+server.get('/gis/testpoint/1/:lat/:long', (req, res) => {
     the_requested_point.coordinates[0] = req.params.lat;
     the_requested_point.coordinates[1] = req.params.long;
     console.log('new point has recieved lat: ' + the_requested_point.coordinates[0] + ' long: ' + the_requested_point.coordinates[1]);
+})
+
+server.get('/gis/testpoint/:lat/:long', (req, res) => {
+    the_requested_point.coordinates[0] = req.params.lat;
+    the_requested_point.coordinates[1] = req.params.long;
+
+
+    the_result_polygons_with_names = [];
+
+    the_polygons_with_names.forEach(element => {
+
+        var sel_polygon_name = element.obj_name;
+
+        var sel_poygons = element.element;
+
+        console.log('new hey : ' + sel_polygon_name);
+        console.log([sel_poygons]);
+
+        console.log('the answer is : ' + inside.polygon([sel_poygons], the_requested_point.coordinates))
+
+        var answer = inside.polygon([sel_poygons], the_requested_point.coordinates);
+
+        // console.log(inside.polygon([element.element], [3, 3]));
+
+        if (answer) {
+            the_result_polygons_with_names.push({ sel_polygon_name, sel_poygons });
+        }
+
+    });
+
+
+    res.send(the_result_polygons_with_names);
 })
 
 
@@ -88,13 +125,23 @@ server.put('/gis/addpolygon', (req, res) => {
     console.log(obj_coors_arr);
 
 
+    obj_coors_arr.forEach(element => {
+        //foreach polygon
+        console.log('hi');
+        element.forEach(element => {
+            console.log(element[0]);
+            console.log(element[1]);
+        });
 
+        the_polygons_with_names.push({ obj_name, element });
+
+    });
 
     // array.forEach(element => {
 
     // });
 
-    res.send(obj);
+    res.send(the_polygons_with_names);
 
 })
 
@@ -103,4 +150,4 @@ server.put('/gis/addpolygon', (req, res) => {
 
 
 server.listen(2019);
-console.log('faridy server is listening on port : 2019...')
+console.log('faridy server is listening on port : 2019...');
