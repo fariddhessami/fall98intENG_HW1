@@ -1,5 +1,11 @@
 const express = require('express');
 
+const fs = require('fs');
+
+load_from_file();
+
+var file_json = {};
+
 const server = express();
 server.use(express.json());
 
@@ -59,19 +65,19 @@ server.get('/gis/testpoint/:lat/:long', (req, res) => {
 
         var sel_polygon_name = element.obj_name;
 
-        var sel_poygons = element.element;
+        var polygons = element.element;
 
         console.log('new hey : ' + sel_polygon_name);
-        console.log([sel_poygons]);
+        console.log([polygons]);
 
-        console.log('the answer is : ' + inside.polygon([sel_poygons], the_requested_point.coordinates))
+        console.log('the answer is : ' + inside.polygon([polygons], the_requested_point.coordinates))
 
-        var answer = inside.polygon([sel_poygons], the_requested_point.coordinates);
+        var answer = inside.polygon([polygons], the_requested_point.coordinates);
 
         // console.log(inside.polygon([element.element], [3, 3]));
 
         if (answer) {
-            the_result_polygons_with_names.push({ sel_polygon_name, sel_poygons });
+            the_result_polygons_with_names.push({ sel_polygon_name, polygons });
         }
 
     });
@@ -144,6 +150,31 @@ server.put('/gis/addpolygon', (req, res) => {
     res.send(the_polygons_with_names);
 
 })
+
+
+function load_from_file() {
+
+
+    try {
+        const data = fs.readFileSync('./file_input.json', 'utf8')
+            // console.log(data)
+        file_json = data;
+        console.log(file_json);
+
+        var obj_from_file = JSON.parse(file_json);
+
+
+
+    } catch (err) {
+        console.error(err)
+    }
+
+
+
+
+
+
+}
 
 
 
